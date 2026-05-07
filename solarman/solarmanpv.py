@@ -210,12 +210,12 @@ class SolarmanPV:
                     )
                     time.sleep(sleep_for)
 
-        except Exception as error:  # pylint: disable=broad-except
-            logging.error("Error on start: %s", str(error))
-            sys.exit(1)
-        except KeyboardInterrupt:
-            logging.info("Exiting on keyboard interrupt")
-            sys.exit(0)
+            except Exception as error:  # pylint: disable=broad-except
+                logging.error("Error on start: %s", str(error))
+                sys.exit(1)
+            except KeyboardInterrupt:
+                logging.info("Exiting on keyboard interrupt")
+                sys.exit(0)
 
     def create_passhash(self, password):
         """
