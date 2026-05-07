@@ -17,5 +17,12 @@
     "password": "",
     "qos": 1,
     "retain": true
+  },
+  "location": {
+    "name": "Lodz",
+    "latitude": 51.7592,
+    "longitude": 19.4560,
+    "timezone": "Europe/Warsaw",
+    "twilight_offset_minutes": 15
   }
 }

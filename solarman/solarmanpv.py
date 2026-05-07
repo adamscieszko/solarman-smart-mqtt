@@ -7,6 +7,10 @@ import logging
 import sys
 import time
 
+from datetime import datetime, timedelta
+from astral import LocationInfo
+from astral.sun import sun
+
 from .api import SolarmanApi, ConstructData
 from .helpers import ConfigCheck, HashPassword
 from .mqtt import Mqtt
@@ -170,19 +174,42 @@ class SolarmanPV:
 
     def daemon(self, file, interval):
         """
-        Run as a daemon process
+        Run as a daemon process — only between sunrise and sunset.
         :param file: Config file
         :param interval: Run interval in seconds
         :return:
         """
         interval = int(interval)
         logging.info(
-            "Starting daemonized with a %s seconds run interval", str(interval)
+            "Starting daemonized with a %s seconds run interval (daylight only)", str(interval)
         )
         while True:
             try:
-                SolarmanPV.single_run_loop(self, file)
-                time.sleep(interval)
+                config = self.load_config(file)
+                # Sun window is taken from the first config entry (all installations
+                # are typically at the same location); if yours are in different
+                # geographic locations, see the note below.
+                sunrise, sunset = self._get_sun_window(config[0])
+                now = datetime.now(sunrise.tzinfo)
+
+                if sunrise <= now <= sunset:
+                    logging.info(
+                        "Daylight window %s - %s, running poll",
+                        sunrise.strftime("%H:%M"), sunset.strftime("%H:%M"),
+                    )
+                    SolarmanPV.single_run_loop(self, file)
+                    time.sleep(interval)
+                else:
+                    sleep_for = self._seconds_until_next_sunrise(config[0])
+                    logging.info(
+                        "Outside daylight window (now %s, sunrise %s, sunset %s). "
+                        "Sleeping %d s until next sunrise.",
+                        now.strftime("%Y-%m-%d %H:%M"),
+                        sunrise.strftime("%H:%M"), sunset.strftime("%H:%M"),
+                        sleep_for,
+                    )
+                    time.sleep(sleep_for)
+
             except Exception as error:  # pylint: disable=broad-except
                 logging.error("Error on start: %s", str(error))
                 sys.exit(1)
@@ -198,3 +225,61 @@ class SolarmanPV:
         """
         pwstring = HashPassword(password)
         print(pwstring.hashed)
+
+    def _get_sun_window(self, conf):
+        """
+        Return (sunrise, sunset) as aware datetimes in the configured timezone.
+        Requires the following in config:
+        "location": {
+            "latitude": 51.7592,
+            "longitude": 19.4560,
+            "timezone": "Europe/Warsaw",      # optional, defaults to UTC
+            "name": "Lodz",                   # optional, cosmetic only
+            "twilight_offset_minutes": 15     # optional, defaults to 0
+        }
+        """
+        loc_cfg = conf.get("location", {})
+        lat = loc_cfg["latitude"]
+        lon = loc_cfg["longitude"]
+        tz_name = loc_cfg.get("timezone", "UTC")
+        offset = timedelta(minutes=loc_cfg.get("twilight_offset_minutes", 0))
+
+        location = LocationInfo(
+            name=loc_cfg.get("name", "site"),
+            region=loc_cfg.get("region", ""),
+            timezone=tz_name,
+            latitude=lat,
+            longitude=lon,
+        )
+        today = datetime.now(location.tzinfo).date()
+        s = sun(location.observer, date=today, tzinfo=location.tzinfo)
+        return s["sunrise"] - offset, s["sunset"] + offset
+
+    def _seconds_until_next_sunrise(self, conf):
+        """
+        How many seconds to sleep until the next sunrise
+        (if already past sunset, until tomorrow's sunrise).
+        """
+        loc_cfg = conf.get("location", {})
+        tz_name = loc_cfg.get("timezone", "UTC")
+        offset = timedelta(minutes=loc_cfg.get("twilight_offset_minutes", 0))
+
+        location = LocationInfo(
+            name=loc_cfg.get("name", "site"),
+            region=loc_cfg.get("region", ""),
+            timezone=tz_name,
+            latitude=loc_cfg["latitude"],
+            longitude=loc_cfg["longitude"],
+        )
+        now = datetime.now(location.tzinfo)
+        today_sun = sun(location.observer, date=now.date(), tzinfo=location.tzinfo)
+        today_sunrise = today_sun["sunrise"] - offset
+
+        if now < today_sunrise:
+            target = today_sunrise
+        else:
+            tomorrow = now.date() + timedelta(days=1)
+            target_sun = sun(location.observer, date=tomorrow, tzinfo=location.tzinfo)
+            target = target_sun["sunrise"] - offset
+
+        return max(60, int((target - now).total_seconds()))
