@@ -2,4 +2,5 @@
 !config.sample.json
 !requirements.txt
 !run.py
+!entrypoint.sh
 !solarman
