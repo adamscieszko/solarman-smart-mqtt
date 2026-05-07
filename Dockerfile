@@ -1,4 +1,4 @@
-FROM python:3.10-slim-bullseye
+FROM python:3.13-slim-bookworm
 
 LABEL maintainer="Adam Ścieszko <adam.scieszko@gmail.com>"
 LABEL org.opencontainers.image.authors="Adam Ścieszko <adam.scieszko@gmail.com>"
@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.source="https://github.com/adamscieszko/solarman-
 LABEL org.opencontainers.image.title="Solarman Smart MQTT"
 LABEL org.opencontainers.image.url="https://github.com/adamscieszko/solarman-smart-mqtt/pkgs/container/solarman-smart-mqtt"
 
-ADD . /opt/app-root/src/
+COPY . /opt/app-root/src/
 WORKDIR /opt/app-root/src
 
 RUN python3 -m venv /opt/venv && \
