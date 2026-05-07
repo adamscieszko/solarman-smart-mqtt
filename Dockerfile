@@ -17,5 +17,7 @@ RUN python3 -m venv /opt/venv && \
 
 ENV PATH=/opt/venv/bin:$PATH
 
-ENTRYPOINT ["python", "run.py"]
-CMD ["-d"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD []
