@@ -31,7 +31,10 @@ class Mqtt:
         :return:
         """
         client_id = f"solarmanpv-mqtt-{random.randint(0, 1000)}"
-        client = mqtt_client.Client(client_id)
+        client = mqtt_client.Client(
+            callback_api_version=mqtt_client.CallbackAPIVersion.VERSION1,
+            client_id=client_id,
+        )
         client.username_pw_set(self.username, self.password)
         client.connect(self.broker, self.port)
         return client

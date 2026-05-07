@@ -2,7 +2,7 @@
 set -e
 cd "$(dirname "$0")/.."
 
-IMG="ghcr.io/mpepping/solarman-mqtt:dev"
+IMG="ghcr.io/adamscieszko/solarman-smart-mqtt:dev"
 RUNTIME="docker"
 
 $RUNTIME build . -t $IMG -f Dockerfile --force-rm

@@ -63,7 +63,7 @@ Although that is not a guarantee that the contents are valid. If
 you still have issues, please check all values and try again.
 
 If you need any further help, please see:
-<https://github.com/mpepping/solarman-mqtt>
+<https://github.com/adamscieszko/solarman-smart-mqtt>
 
 """
 

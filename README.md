@@ -476,12 +476,12 @@ template:
 
 ### Screenshot
 
-![Screenshot](https://github.com/mpepping/solarman-mqtt/raw/main/doc/images/screenshot.png "Screenshot")
-![Screenshot](https://github.com/mpepping/solarman-mqtt/raw/main/doc/images/screenshot_haenergy.png "Screenshot")
+![Screenshot](https://github.com/adamscieszko/solarman-smart-mqtt/raw/main/doc/images/screenshot.png "Screenshot")
+![Screenshot](https://github.com/adamscieszko/solarman-smart-mqtt/raw/main/doc/images/screenshot_haenergy.png "Screenshot")
 
 ## Running
 
-The easiest way to run is via a container. Current version is available at <https://github.com/mpepping/solarman-mqtt/pkgs/container/solarman-mqtt>
+The easiest way to run is via a container. Current version is available at <https://github.com/adamscieszko/solarman-smart-mqtt/pkgs/container/solarman-mqtt>
 
 ### Using Docker
 
@@ -489,10 +489,10 @@ Docker example to run this script every 5 minutes and providing a config file:
 
 ```bash
 cd /opt
-git clone https://github.com/mpepping/solarman-mqtt
+git clone https://github.com/adamscieszko/solarman-smart-mqtt
 cd solarman-mqtt
 mv config.sample.json config.json # setup your config
-sudo docker run --name solarman-mqtt -d --restart unless-stopped -v /opt/solarman-mqtt:/opt/app-root/src ghcr.io/mpepping/solarman-mqtt:latest
+sudo docker run --name solarman-mqtt -d --restart unless-stopped -v /opt/solarman-mqtt:/opt/app-root/src ghcr.io/adamscieszko/solarman-smart-mqtt:latest
 ```
 
 ### Using docker-compose
@@ -504,7 +504,7 @@ version: '3'
 
 services:
   solarman-mqtt:
-    image: ghcr.io/mpepping/solarman-mqtt:latest
+    image: ghcr.io/adamscieszko/solarman-smart-mqtt:latest
     container_name: "solarman-mqtt"
     environment:
     - TZ=Europe/Berlin
