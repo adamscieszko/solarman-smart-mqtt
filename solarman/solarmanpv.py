@@ -7,7 +7,7 @@ import logging
 import sys
 import time
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from astral import LocationInfo
 from astral.sun import sun
 
@@ -272,12 +272,14 @@ class SolarmanPV:
             longitude=loc_cfg["longitude"],
         )
         now = datetime.now(location.tzinfo)
-        today_sunrise = sun(location.observer, date=now.date(), tzinfo=location.tzinfo)["sunrise"] - offset
+        today_sun = sun(location.observer, date=now.date(), tzinfo=location.tzinfo)
+        today_sunrise = today_sun["sunrise"] - offset
 
         if now < today_sunrise:
             target = today_sunrise
         else:
             tomorrow = now.date() + timedelta(days=1)
-            target = sun(location.observer, date=tomorrow, tzinfo=location.tzinfo)["sunrise"] - offset
+            target_sun = sun(location.observer, date=tomorrow, tzinfo=location.tzinfo)
+            target = target_sun["sunrise"] - offset
 
         return max(60, int((target - now).total_seconds()))
