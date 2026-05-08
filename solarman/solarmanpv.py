@@ -64,22 +64,30 @@ class SolarmanPV:
         logger_data = pvdata.device_current_data_logger
         meter_data = pvdata.device_current_data_meter
 
-        inverter_data_list = ConstructData(inverter_data).device_current_data
-        logger_data_list = ConstructData(logger_data).device_current_data
-        if meter_data:
-            meter_data_list = ConstructData(meter_data).device_current_data
+        inverter_data_list = (
+            ConstructData(inverter_data).device_current_data if inverter_data else None
+        )
+        logger_data_list = (
+            ConstructData(logger_data).device_current_data if logger_data else None
+        )
+        meter_data_list = (
+            ConstructData(meter_data).device_current_data if meter_data else None
+        )
 
         if config.get("debug", False):
-            logging.info(json.dumps("STATION DATA"))
-            logging.info(json.dumps(station_data, indent=4, sort_keys=True))
-            logging.info(json.dumps("INVERTER DATA"))
-            logging.info(json.dumps(inverter_data, indent=4, sort_keys=True))
-            logging.info(json.dumps("INVERTER DATA LIST"))
-            logging.info(json.dumps(inverter_data_list, indent=4, sort_keys=True))
-            logging.info(json.dumps("LOGGER DATA"))
-            logging.info(json.dumps(logger_data, indent=4, sort_keys=True))
-            logging.info(json.dumps("LOGGER DATA LIST"))
-            logging.info(json.dumps(logger_data_list, indent=4, sort_keys=True))
+            if station_data:
+                logging.info(json.dumps("STATION DATA"))
+                logging.info(json.dumps(station_data, indent=4, sort_keys=True))
+            if inverter_data:
+                logging.info(json.dumps("INVERTER DATA"))
+                logging.info(json.dumps(inverter_data, indent=4, sort_keys=True))
+                logging.info(json.dumps("INVERTER DATA LIST"))
+                logging.info(json.dumps(inverter_data_list, indent=4, sort_keys=True))
+            if logger_data:
+                logging.info(json.dumps("LOGGER DATA"))
+                logging.info(json.dumps(logger_data, indent=4, sort_keys=True))
+                logging.info(json.dumps("LOGGER DATA LIST"))
+                logging.info(json.dumps(logger_data_list, indent=4, sort_keys=True))
             if meter_data:
                 logging.info(json.dumps("METER DATA"))
                 logging.info(json.dumps(meter_data, indent=4, sort_keys=True))
@@ -92,7 +100,7 @@ class SolarmanPV:
         _t = time.strftime("%Y-%m-%d %H:%M:%S")
         try:
             inverter_device_state = inverter_data["deviceState"]
-        except KeyError:
+        except (KeyError, TypeError):
             inverter_device_state = 128
 
         meter_state = None
@@ -121,9 +129,12 @@ class SolarmanPV:
                 _t,
                 inverter_device_state,
             )
-            for i in station_data:
-                if station_data[i] and i not in discard:
-                    mqtt_connection.message(topic + "/station/" + i, station_data[i])
+            if station_data:
+                for i in station_data:
+                    if station_data[i] and i not in discard:
+                        mqtt_connection.message(
+                            topic + "/station/" + i, station_data[i]
+                        )
 
             for i in inverter_data:
                 if inverter_data[i] and i not in discard:
@@ -134,14 +145,15 @@ class SolarmanPV:
                 json.dumps(inverter_data_list),
             )
 
-            for i in logger_data:
-                if logger_data[i] and i not in discard:
-                    mqtt_connection.message(topic + "/logger/" + i, logger_data[i])
+            if logger_data:
+                for i in logger_data:
+                    if logger_data[i] and i not in discard:
+                        mqtt_connection.message(topic + "/logger/" + i, logger_data[i])
 
-            mqtt_connection.message(
-                topic + "/logger/attributes",
-                json.dumps(logger_data_list),
-            )
+                mqtt_connection.message(
+                    topic + "/logger/attributes",
+                    json.dumps(logger_data_list),
+                )
 
         elif inverter_device_state == 128:
             logging.info(
@@ -154,9 +166,10 @@ class SolarmanPV:
             mqtt_connection.message(
                 topic + "/inverter/deviceState", inverter_data.get("deviceState")
             )
-            mqtt_connection.message(
-                topic + "/logger/deviceState", logger_data.get("deviceState")
-            )
+            if logger_data:
+                mqtt_connection.message(
+                    topic + "/logger/deviceState", logger_data.get("deviceState")
+                )
             logging.info(
                 "%s - Inverter DeviceState: %s"
                 "-> Only status MQTT publish (probably offline due to nighttime shutdown)",

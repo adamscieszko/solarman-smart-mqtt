@@ -1,5 +1,5 @@
 {
-	"image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.10",
+	"image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.13",
 	"customizations": {
 		// Configure properties specific to VS Code.
 		"vscode": {
@@ -28,7 +28,7 @@
 			]
 		}
 	},
-	"postCreateCommand": "pip install black flake8 jsonschema paho_mqtt pylint && sudo -n apt update && sudo -n apt install git -y",
+	"postCreateCommand": "pip install black flake8 jsonschema paho_mqtt pylint astral && sudo -n apt update && sudo -n apt install git -y",
 
 	// https://www.kenmuse.com/blog/avoiding-dubious-ownership-in-dev-containers/
 	"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}"
