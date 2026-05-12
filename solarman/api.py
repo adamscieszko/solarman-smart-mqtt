@@ -15,7 +15,6 @@ class SolarmanApi:
 
     def __init__(self, config):
         self.config = config
-        self.station_id = config["stationId"]
         self.url = config["url"]
         self.token = self.get_token(
             self.config["appid"],
@@ -23,20 +22,29 @@ class SolarmanApi:
             self.config["username"],
             self.config["passhash"],
         )
-        self.station_realtime = self.get_station_realtime()
-        self.device_current_data_inverter = self.get_device_current_data(
-            self.config["inverterId"]
-        )
-        self.device_current_data_logger = self.get_device_current_data(
-            self.config["loggerId"]
+        self.station_realtime = (
+            self.get_station_realtime(self.config["stationId"])
+            if "stationId" in self.config
+            else None
         )
 
-        try:
-            self.device_current_data_meter = self.get_device_current_data(
-                self.config["meterId"]
-            )
-        except KeyError:
-            self.device_current_data_meter = None
+        self.device_current_data_inverter = (
+            self.get_device_current_data(self.config["inverterId"])
+            if "inverterId" in self.config
+            else None
+        )
+
+        self.device_current_data_logger = (
+            self.get_device_current_data(self.config["loggerId"])
+            if "loggerId" in self.config
+            else None
+        )
+
+        self.device_current_data_meter = (
+            self.get_device_current_data(self.config["meterId"])
+            if "meterId" in self.config
+            else None
+        )
 
     def get_token(self, appid, secret, username, passhash):
         """
@@ -59,13 +67,13 @@ class SolarmanApi:
             logging.error("Unable to fetch token: %s", str(error))
             sys.exit(1)
 
-    def get_station_realtime(self):
+    def get_station_realtime(self, station_id):
         """
         Return station realtime data
         :return: realtime data
         """
         conn = http.client.HTTPSConnection(self.url, timeout=60)
-        payload = json.dumps({"stationId": self.station_id})
+        payload = json.dumps({"stationId": station_id})
         headers = {
             "Content-Type": "application/json",
             "Authorization": "bearer " + self.token,

@@ -19,9 +19,7 @@ _SCHEMA = {
         "secret",
         "username",
         "passhash",
-        "stationId",
         "inverterId",
-        "loggerId",
     ],
     "properties": {
         "name": {
@@ -32,6 +30,8 @@ _SCHEMA = {
         "secret": {"type": "string", "minLength": 32, "maxLength": 32},
         "username": {"type": "string"},
         "passhash": {"type": "string", "minLength": 64, "maxLength": 64},
+        # Only "inverterId" is required. Omit "stationId", "loggerId" and/or
+        # "meterId" to skip those API calls and reduce the request count.
         "stationId": {"type": "number", "minimum": 100000, "maximum": 999999999},
         "inverterId": {"type": "string", "minLength": 10},
         "loggerId": {"type": "string", "minLength": 10, "maxLength": 10},

@@ -51,7 +51,9 @@ The first part covers your SolarmanPV account:
 * **username**: is the username for the API (emailadres).
 * **passhash**: is a sha256 hash of your password. This can be generated via `--create-passhash`.
 
-The second part covers the PV inverter and logger ID's. These can be retrieved via the Solarman API.
+The second part covers the PV station, inverter and logger ID's. These can be retrieved via the Solarman API.
+
+Only **inverterId** is required. **stationId**, **loggerId** and **meterId** are optional — if you leave one of them out of the config, that device is not queried at all, which reduces the number of requests made to the Solarman API (useful if you only care about the inverter data and want to stay within the API rate limits).
 
 ```json
 {
@@ -63,7 +65,7 @@ The second part covers the PV inverter and logger ID's. These can be retrieved v
 }
 ```
 
-* **stationId**: is the ID of the station. This is the value of `stationList[0].id`.
+* **stationId** (optional): is the ID of the station. This is the value of `stationList[0].id`. Omit it to skip the station realtime API call.
 
 ```bash
 curl --location --request POST 'https://globalapi.solarmanpv.com/station/v1.0/list?language=en' \
@@ -82,7 +84,7 @@ curl --location --request POST 'https://globalapi.solarmanpv.com/station/v1.0/de
   --data-raw '{"size":10,"page":1,"stationId":1234567,"deviceType":"INVERTER"}'
 ```
 
-* **loggerId**: is the SN of the logger. This is the value of `deviceListItems[0].deviceSn`.
+* **loggerId** (optional): is the SN of the logger. This is the value of `deviceListItems[0].deviceSn`. Omit it to skip the logger current data API call.
 
 ```bash
 curl --location --request POST 'https://globalapi.solarmanpv.com/station/v1.0/device?language=en' \
