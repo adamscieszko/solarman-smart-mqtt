@@ -1,7 +1,4 @@
-# solarman-mqtt
-
-> [!NOTE]
-> This repository is archived and no longer actively maintained.
+# solarman-smart-mqtt
 
 Script to retrieve current Solar PV data from the Solarman API, and send Power (W) and Energy (kWh) metrics to a MQTT broker, for further use in home automation. Several PV vendors use the Solarman Smart platform for statistics. One example is the Trannergy PV converter.
 
@@ -483,7 +480,7 @@ template:
 
 ## Running
 
-The easiest way to run is via a container. Current version is available at <https://github.com/adamscieszko/solarman-smart-mqtt/pkgs/container/solarman-mqtt>
+The easiest way to run is via a container. Current version is available at <https://github.com/adamscieszko/solarman-smart-mqtt/pkgs/container/solarman-smart-mqtt>
 
 ### Using Docker
 
@@ -492,9 +489,9 @@ Docker example to run this script every 5 minutes and providing a config file:
 ```bash
 cd /opt
 git clone https://github.com/adamscieszko/solarman-smart-mqtt
-cd solarman-mqtt
+cd solarman-smart-mqtt
 mv config.sample.json config.json # setup your config
-sudo docker run --name solarman-mqtt -d --restart unless-stopped -v /opt/solarman-mqtt:/opt/app-root/src ghcr.io/adamscieszko/solarman-smart-mqtt:latest
+sudo docker run --name solarman-smart-mqtt -d --restart unless-stopped -v /opt/solarman-smart-mqtt:/opt/app-root/src ghcr.io/adamscieszko/solarman-smart-mqtt:latest
 ```
 
 ### Using docker-compose
@@ -505,13 +502,13 @@ This `docker-compose.yml` example can be used with docker-compose or podman-comp
 version: '3'
 
 services:
-  solarman-mqtt:
+  solarman-smart-mqtt:
     image: ghcr.io/adamscieszko/solarman-smart-mqtt:latest
-    container_name: "solarman-mqtt"
+    container_name: "solarman-smart-mqtt"
     environment:
     - TZ=Europe/Berlin
     volumes:
-      - /opt/solarman-mqtt/config.json:/opt/app-root/src/config.json # or mount your complete config directory
+      - /opt/solarman-smart-mqtt/config.json:/opt/app-root/src/config.json # or mount your complete config directory
     restart: unless-stopped
 ```
 
